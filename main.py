@@ -23,15 +23,16 @@ llm = ChatGoogleGenerativeAI(
 )
 
 print("Hi, I am Albert, how can I help you today? ")
-
+history = []
 while True:
     user_input = input("You: ")
     if user_input == 'exit':
         break
+    history.append({"role": "user", "content": user_input})
+    print("History: ", history)
     response = llm.invoke([
-        {'role': 'system', 'content': system_prompt},
-        {'role': 'user', 'content': user_input},
-    ])
-
+        {'role': 'system', 'content': system_prompt}
+    ] + history)
+    history.append({'role': 'assistant', 'content': response.content})
     print(f"Albert: {response.content}")
 
