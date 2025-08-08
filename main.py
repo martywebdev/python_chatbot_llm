@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import gradio as gr
 
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -36,14 +37,32 @@ chain = prompt | llm | StrOutputParser()
 
 print("Hi, I am Albert, how can I help you today? ")
 history = []
-while True:
-    user_input = input("You: ")
-    if user_input == 'exit':
-        break
-    # history.append({"role": "user", "content": user_input}) // no langchain
-    # response = llm.invoke([{'role': 'system', 'content': system_prompt}] + history)
-    response = chain.invoke({"input": user_input, "history": history})
-    print(f"Albert: {response}")
-    # history.append({'role': 'assistant', 'content': response.content})
-    history.append(HumanMessage(content=user_input))
-    history.append(AIMessage(content=response))
+# while True:
+#     user_input = input("You: ")
+#     if user_input == 'exit':
+#         break
+#     # history.append({"role": "user", "content": user_input}) // no langchain
+#     # response = llm.invoke([{'role': 'system', 'content': system_prompt}] + history)
+#     response = chain.invoke({"input": user_input, "history": history})
+#     print(f"Albert: {response}")
+#     # history.append({'role': 'assistant', 'content': response.content})
+#     history.append(HumanMessage(content=user_input))
+#     history.append(AIMessage(content=response))
+
+page = gr.Blocks(title="Chat with Einstein", theme=gr.themes.Soft())
+
+with page:
+    gr.Markdown(
+        """
+        # Chat with Einstein
+        Welcome to your personal conversation with Albert Einstein
+        """
+    )
+
+    chatbot = gr.Chatbot()
+
+    msg = gr.Textbox()
+
+    clear = gr.Button("Clear Chat ")
+
+page.launch(share=True)
