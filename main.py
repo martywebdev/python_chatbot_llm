@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
 import os
+
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 load_dotenv()
@@ -22,17 +26,24 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.5
 )
 
+prompt = ChatPromptTemplate.from_messages([
+    ("system", system_prompt),
+    (MessagesPlaceholder(variable_name="history")), #this is history list
+    ("user", "{input}") # this is the input on chain.invoke()
+])
+
+chain = prompt | llm | StrOutputParser()
+
 print("Hi, I am Albert, how can I help you today? ")
 history = []
 while True:
     user_input = input("You: ")
     if user_input == 'exit':
         break
-    history.append({"role": "user", "content": user_input})
-    print("History: ", history)
-    response = llm.invoke([
-        {'role': 'system', 'content': system_prompt}
-    ] + history)
-    history.append({'role': 'assistant', 'content': response.content})
-    print(f"Albert: {response.content}")
-
+    # history.append({"role": "user", "content": user_input}) // no langchain
+    # response = llm.invoke([{'role': 'system', 'content': system_prompt}] + history)
+    response = chain.invoke({"input": user_input, "history": history})
+    print(f"Albert: {response}")
+    # history.append({'role': 'assistant', 'content': response.content})
+    history.append(HumanMessage(content=user_input))
+    history.append(AIMessage(content=response))
