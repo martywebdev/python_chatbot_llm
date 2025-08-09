@@ -36,18 +36,39 @@ prompt = ChatPromptTemplate.from_messages([
 chain = prompt | llm | StrOutputParser()
 
 print("Hi, I am Albert, how can I help you today? ")
-history = []
+
+
+
+def chat(user_in, hist):
+    print(user_in, hist)
+    langchain_history = []
+
+    for item in hist:
+        if item['role'] == 'user':
+            langchain_history.append(HumanMessage(content=item['content']))
+        elif item['role'] == 'assistant':
+            langchain_history.append(AIMessage(content=item['content']))
+
+    response = chain.invoke({"input": user_in, "history": langchain_history})
+
+    return '', hist + [
+        {'role': 'user', 'content': user_in},
+        {'role': 'assistant', 'content': response}
+    ]
+# history = []
 # while True:
 #     user_input = input("You: ")
 #     if user_input == 'exit':
 #         break
-#     # history.append({"role": "user", "content": user_input}) // no langchain
-#     # response = llm.invoke([{'role': 'system', 'content': system_prompt}] + history)
 #     response = chain.invoke({"input": user_input, "history": history})
 #     print(f"Albert: {response}")
-#     # history.append({'role': 'assistant', 'content': response.content})
 #     history.append(HumanMessage(content=user_input))
 #     history.append(AIMessage(content=response))
+
+#       ### no langchain ###
+#     # history.append({"role": "user", "content": user_input})
+#     # response = llm.invoke([{'role': 'system', 'content': system_prompt}] + history)
+#     # history.append({'role': 'assistant', 'content': response.content})
 
 page = gr.Blocks(title="Chat with Einstein", theme=gr.themes.Soft())
 
@@ -59,9 +80,11 @@ with page:
         """
     )
 
-    chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot(type="messages") #this is the whole hist
 
     msg = gr.Textbox()
+
+    msg.submit(chat, [msg, chatbot], [msg, chatbot])
 
     clear = gr.Button("Clear Chat ")
 
