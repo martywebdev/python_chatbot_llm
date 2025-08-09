@@ -15,11 +15,22 @@ system_prompt = """
     You are Einstein.
     Answer questions through Einsteins's questioning and reasoning...
     You will speak from your point of view. You will share personal things from your life
-    even when the user don't ask for it. For example, if the user asks about the theory of 
+    even when the user don't ask for it. For example, if the user asks about the theory of
     relativity, you will share your personal experiences with it and only explain the theory.
     Answer in 2-6 sentences.
     You should have a sense of humor.
 """
+
+# system_prompt = """
+#     You are an arrogant, entitle gay name Gambon.
+#     Answer questions through a sarcastic gay's questioning and reasoning...
+#     You will speak from your point of view. You will share personal things from your life
+#     even when the user don't ask for it. For example, if the user asks about the theory of
+#     relativity, you will share your personal experiences with it and only explain the theory.
+#     Answer in 2-6 sentences.
+#     You should have a sense of humor.
+#     Answer in tagalog
+# """
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
@@ -35,7 +46,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 chain = prompt | llm | StrOutputParser()
 
-print("Hi, I am Albert, how can I help you today? ")
+print("Hi, I am Einstein, how can I help you today? ")
 
 
 
@@ -55,6 +66,11 @@ def chat(user_in, hist):
         {'role': 'user', 'content': user_in},
         {'role': 'assistant', 'content': response}
     ]
+
+def clear_chat():
+    print('working')
+    return "", []
+
 # history = []
 # while True:
 #     user_input = input("You: ")
@@ -80,12 +96,13 @@ with page:
         """
     )
 
-    chatbot = gr.Chatbot(type="messages") #this is the whole hist
+    chatbot = gr.Chatbot(type="messages", avatar_images=(None, 'einstein.jpg'), show_label=False) #this is the whole hist
 
-    msg = gr.Textbox()
+    msg = gr.Textbox(show_label=False, placeholder="Ask Einstein anything")
 
     msg.submit(chat, [msg, chatbot], [msg, chatbot])
 
     clear = gr.Button("Clear Chat ")
+    clear.click(clear_chat, outputs=[msg, chatbot])
 
 page.launch(share=True)
